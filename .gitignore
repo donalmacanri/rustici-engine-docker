@@ -2,4 +2,4 @@
 .vscode
 
 rustici-engine/engine-release/**
-
+!rustici-engine/engine-release/.git-hold
