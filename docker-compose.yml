@@ -11,14 +11,12 @@ services:
     environment:
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_NAME=rustici_engine
-      - DB_USER=rustici
-      - DB_PASSWORD=rustici_password
+      - DB_NAME=rusticiengine
+      - DB_USER=rusticiengine
+      - DB_PASSWORD=super-secret-password
     depends_on:
       postgres:
         condition: service_healthy
-      rustici-installer:
-        condition: service_completed_successfully
 
   rustici-installer:
     build:
@@ -28,9 +26,9 @@ services:
     environment:
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_NAME=rustici_engine
-      - DB_USER=rustici
-      - DB_PASSWORD=rustici_password
+      - DB_NAME=rusticiengine
+      - DB_USER=rusticiengine
+      - DB_PASSWORD=super-secret-password
     profiles:
       - install
     depends_on:
@@ -40,14 +38,14 @@ services:
   postgres:
     image: postgres:15
     environment:
-      - POSTGRES_DB=rustici_engine
-      - POSTGRES_USER=rustici
-      - POSTGRES_PASSWORD=rustici_password
+      - POSTGRES_PASSWORD=super-secret-password
+    configs:
+      - source: init_dbs.sql
+        target: /docker-entrypoint-initdb.d/init_dbs.sql
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U rustici -d rustici_engine"]
+      test: ["CMD-SHELL", "pg_isready -U rusticiengine -d rusticiengine"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -56,29 +54,22 @@ volumes:
   postgres_data:
 
 configs:
-  init_sql:
+  init_dbs.sql:
     content: |
-      DO $$
+      DO $$$$
       BEGIN
          IF NOT EXISTS (
             SELECT FROM pg_catalog.pg_roles
-            WHERE  rolname = 'rustici') THEN
-            CREATE ROLE rustici LOGIN PASSWORD 'rustici_password';
+            WHERE  rolname = 'rusticiengine') THEN
+            CREATE ROLE rusticiengine LOGIN PASSWORD 'super-secret-password';
          END IF;
-      END $$;
+      END $$$$;
 
-      CREATE DATABASE rustici_engine
-          WITH 
-          OWNER = rustici
-          ENCODING = 'UTF8'
-          LC_COLLATE = 'en_US.utf8'
-          LC_CTYPE = 'en_US.utf8'
-          TABLESPACE = pg_default
-          CONNECTION LIMIT = -1;
+      CREATE DATABASE rusticiengine WITH OWNER = rusticiengine;
 
-      \c rustici_engine
+      \c rusticiengine
 
-      GRANT ALL PRIVILEGES ON DATABASE rustici_engine TO rustici;
-      GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO rustici;
-      GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO rustici;
-      GRANT ALL PRIVILEGES ON SCHEMA public TO rustici;
+      GRANT ALL PRIVILEGES ON DATABASE rusticiengine TO rusticiengine;
+      GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO rusticiengine;
+      GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO rusticiengine;
+      GRANT ALL PRIVILEGES ON SCHEMA public TO rusticiengine;
