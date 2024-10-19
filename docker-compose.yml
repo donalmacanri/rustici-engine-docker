@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  rustici-engine:
+    build:
+      context: ./rustici-engine
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=rustici_engine
+      - DB_USER=rustici
+      - DB_PASSWORD=rustici_password
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=rustici_engine
+      - POSTGRES_USER=rustici
+      - POSTGRES_PASSWORD=rustici_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
