@@ -31,12 +31,14 @@ services:
       - DB_NAME=rustici_engine
       - DB_USER=rustici
       - DB_PASSWORD=rustici_password
+    profiles:
+      - install
     depends_on:
       postgres:
         condition: service_healthy
 
   postgres:
-    image: postgres:13
+    image: postgres:15
     environment:
       - POSTGRES_DB=rustici_engine
       - POSTGRES_USER=rustici
