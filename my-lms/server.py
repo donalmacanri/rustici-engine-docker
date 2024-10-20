@@ -16,7 +16,7 @@ async def main():
                     web.get('/{name}', handle)])
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, 'localhost', 8080)
+    site = web.TCPSite(runner, '0.0.0.0', 8080)
     await site.start()
     print(f"Serving on http://localhost:8080")
     await asyncio.Event().wait()  # run forever
