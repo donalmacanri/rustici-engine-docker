@@ -1,13 +1,17 @@
 import asyncio
 from aiohttp import web
+import jinja2
+import aiohttp_jinja2
 
 async def handle(request):
     name = request.match_info.get('name', "Anonymous")
-    text = f"Hello, {name}"
-    return web.Response(text=text)
+    context = {'name': name}
+    response = aiohttp_jinja2.render_template('index.html', request, context)
+    return response
 
 async def main():
     app = web.Application()
+    aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('my-lms/templates'))
     app.add_routes([web.get('/', handle),
                     web.get('/{name}', handle)])
     runner = web.AppRunner(app)
