@@ -33,7 +33,7 @@
         <thead>
             <tr>
                 <th>Title</th>
-                <th>Description</th>
+                <th>ID</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -41,7 +41,7 @@
             {% for course in courses %}
             <tr>
                 <td>{{ course.title }}</td>
-                <td>{{ course.description }}</td>
+                <td>{{ course.id }}</td>
                 <td><a href="/launch/{{ course.id }}">Launch</a></td>
             </tr>
             {% endfor %}
