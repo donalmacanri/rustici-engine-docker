@@ -78,11 +78,20 @@
                     },
                     launchOptions: {
                         startPage: "index_lms.html"
+                    },
+                    launchAuth: {
+                        ipAddress: "127.0.0.1",
+                        sessionId: "session-" + Date.now()
                     }
                 })
             });
             const data = await response.json();
-            window.open(data.launchLink, '_blank');
+            if (data.launchLink) {
+                window.open(data.launchLink, '_blank');
+            } else {
+                console.error('Failed to get launch link:', data);
+                alert('Failed to launch course. Please try again.');
+            }
         }
 
         async function uploadCourse(formData) {
