@@ -23,13 +23,13 @@
     <h1>Welcome to myLMS</h1>
     
     <h2>Upload New SCORM Course</h2>
-    <form action="/upload" method="post" enctype="multipart/form-data">
+    <form id="uploadForm">
         <input type="file" name="scorm_package" accept=".zip">
         <input type="submit" value="Upload SCORM Package">
     </form>
 
     <h2>Available Courses</h2>
-    <table>
+    <table id="coursesTable">
         <thead>
             <tr>
                 <th>Title</th>
@@ -38,14 +38,80 @@
             </tr>
         </thead>
         <tbody>
-            {% for course in courses %}
-            <tr>
-                <td>{{ course.title }}</td>
-                <td>{{ course.id }}</td>
-                <td><a href="/launch/{{ course.id }}">Launch</a></td>
-            </tr>
-            {% endfor %}
         </tbody>
     </table>
+
+    <script>
+        let authToken = '';
+
+        async function getToken() {
+            const response = await fetch('/token');
+            const data = await response.json();
+            authToken = data.token;
+        }
+
+        async function getCourses() {
+            const response = await fetch('http://localhost:8080/RusticiEngine/api/v2/courses', {
+                headers: {
+                    'Authorization': authToken
+                }
+            });
+            return await response.json();
+        }
+
+        async function launchCourse(courseId) {
+            const response = await fetch(`http://localhost:8080/RusticiEngine/api/v2/courses/${courseId}/registrations`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': authToken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    registrationId: `reg-${courseId}-${Date.now()}`
+                })
+            });
+            const data = await response.json();
+            window.open(data.launchLink, '_blank');
+        }
+
+        async function uploadCourse(formData) {
+            const response = await fetch('http://localhost:8080/RusticiEngine/api/v2/courses/importJobs?mayCreateNewVersion=true', {
+                method: 'POST',
+                headers: {
+                    'Authorization': authToken
+                },
+                body: formData
+            });
+            return await response.json();
+        }
+
+        async function updateCourseList() {
+            const courses = await getCourses();
+            const tbody = document.querySelector('#coursesTable tbody');
+            tbody.innerHTML = '';
+            courses.forEach(course => {
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = course.title;
+                row.insertCell(1).textContent = course.id;
+                const launchCell = row.insertCell(2);
+                const launchButton = document.createElement('button');
+                launchButton.textContent = 'Launch';
+                launchButton.onclick = () => launchCourse(course.id);
+                launchCell.appendChild(launchButton);
+            });
+        }
+
+        document.getElementById('uploadForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            await uploadCourse(formData);
+            await updateCourseList();
+        };
+
+        (async () => {
+            await getToken();
+            await updateCourseList();
+        })();
+    </script>
 </body>
 </html>

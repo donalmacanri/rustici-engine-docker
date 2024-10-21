@@ -5,6 +5,9 @@ import jinja2
 import aiohttp_jinja2
 import base64
 import json
+from aiohttp_session import setup, get_session
+from aiohttp_session.cookie_storage import EncryptedCookieStorage
+import secrets
 
 # Rustici Engine API configuration
 ENGINE_TENANT = "default"
@@ -16,22 +19,14 @@ async def get_auth_token():
     credentials = base64.b64encode(f"{ENGINE_USERNAME}:{ENGINE_PASSWORD}".encode()).decode()
     return f"Basic {credentials}"
 
-async def get_courses():
-    async with ClientSession() as session:
-        auth_token = await get_auth_token()
-        async with session.get(
-            f"{ENGINE_BASE_URL}/courses",
-            headers={"Authorization": auth_token}
-        ) as response:
-            if response.status == 200:
-                return await response.json()
-            else:
-                return []
+async def get_token(request):
+    session = await get_session(request)
+    if 'auth_token' not in session:
+        session['auth_token'] = await get_auth_token()
+    return web.json_response({'token': session['auth_token']})
 
 async def handle(request):
-    courses = await get_courses()
-    context = {"courses": courses}
-    response = aiohttp_jinja2.render_template("index.html", request, context)
+    response = aiohttp_jinja2.render_template("index.html", request, {})
     return response
 
 async def upload_scorm(request):
@@ -70,28 +65,14 @@ async def upload_scorm(request):
             else:
                 return web.Response(text=f"Failed to upload course. Status: {response.status}", status=400)
 
-async def launch_course(request):
-    course_id = request.match_info['id']
-    async with ClientSession() as session:
-        auth_token = await get_auth_token()
-        async with session.post(
-            f"{ENGINE_BASE_URL}/courses/{course_id}/registrations",
-            headers={"Authorization": auth_token},
-            json={"registrationId": f"reg-{course_id}-{asyncio.get_event_loop().time()}"}
-        ) as response:
-            if response.status == 200:
-                result = await response.json()
-                return web.Response(text=f"Course launched. Launch URL: {result['launchLink']}", content_type='text/html')
-            else:
-                return web.Response(text="Failed to launch course", status=400)
-
 async def main():
     app = web.Application()
+    setup(app, EncryptedCookieStorage(secrets.token_bytes(32)))
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader("./templates"))
     app.add_routes([
         web.get("/", handle),
         web.post("/upload", upload_scorm),
-        web.get("/launch/{id}", launch_course)
+        web.get("/token", get_token)
     ])
     runner = web.AppRunner(app)
     await runner.setup()
