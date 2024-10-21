@@ -63,7 +63,7 @@
         }
 
         async function launchCourse(courseId) {
-            const response = await fetch(`${ENGINE_BASE_URL}/registrations`, {
+            const response = await fetch(`${ENGINE_BASE_URL}/registrations/withLaunchLink`, {
                 method: 'POST',
                 headers: {
                     'Authorization': authToken,
@@ -74,9 +74,10 @@
                     courseId: courseId,
                     registrationId: `reg-${courseId}-${Date.now()}`,
                     learner: {
-                        id: 'testuser',
-                        firstName: 'test',
-                        lastName: 'user',
+                        id: 'testuser'
+                    },
+                    launchOptions: {
+                        startPage: "index_lms.html"
                     }
                 })
             });
