@@ -24,7 +24,7 @@
 
     <h2>Upload New SCORM Course</h2>
     <form id="uploadForm">
-        <input type="file" name="scorm_package" accept=".zip">
+        <input type="file" name="file" accept=".zip">
         <input type="submit" value="Upload SCORM Package">
     </form>
 
@@ -79,23 +79,21 @@
         }
 
         async function uploadCourse(formData) {
-            const file = formData.get('scorm_package');
             const courseId = `course-${Date.now()}`;
-            const response = await fetch(`${ENGINE_BASE_URL}/courses/importJobs?courseId=${courseId}`, {
+            const response = await fetch(`${ENGINE_BASE_URL}/courses/upload?courseId=${courseId}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': authToken,
                     'engineTenantName': ENGINE_TENANT,
-                    'Content-Type': 'application/zip',
-                    'Content-Disposition': `attachment; filename="${file.name}"`
                 },
-                body: file
+                body: formData,
             });
             return await response.json();
         }
 
         async function updateCourseList() {
-            const courses = await getCourses();
+            const {courses} = await getCourses();
+            console.log(courses);
             const tbody = document.querySelector('#coursesTable tbody');
             tbody.innerHTML = '';
             courses.forEach(course => {
