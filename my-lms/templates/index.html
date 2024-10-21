@@ -3,10 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to myLMS</title>
+    <title>myLMS - Course Catalog</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
 </head>
 <body>
-    <h1>Hello, {{ name }}!</h1>
-    <p>Welcome to myLMS.</p>
+    <h1>Welcome to myLMS</h1>
+    
+    <h2>Upload New SCORM Course</h2>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="scorm_package" accept=".zip">
+        <input type="submit" value="Upload SCORM Package">
+    </form>
+
+    <h2>Available Courses</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for course in courses %}
+            <tr>
+                <td>{{ course.title }}</td>
+                <td>{{ course.description }}</td>
+                <td><a href="/launch/{{ course.id }}">Launch</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </body>
 </html>
