@@ -63,7 +63,7 @@
         }
 
         async function launchCourse(courseId) {
-            const response = await fetch(`${ENGINE_BASE_URL}/courses/${courseId}/registrations`, {
+            const response = await fetch(`${ENGINE_BASE_URL}/registrations`, {
                 method: 'POST',
                 headers: {
                     'Authorization': authToken,
@@ -71,7 +71,11 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    registrationId: `reg-${courseId}-${Date.now()}`
+                    courseId: courseId,
+                    registrationId: `reg-${courseId}-${Date.now()}`,
+                    learner: {
+                        id: 'testuser'
+                    }
                 })
             });
             const data = await response.json();
