@@ -10,10 +10,10 @@ from aiohttp_session.cookie_storage import EncryptedCookieStorage
 import secrets
 
 # Rustici Engine API configuration
-ENGINE_TENANT = "default"
-ENGINE_BASE_URL = "http://localhost:8080/RusticiEngine/api/v2"
-ENGINE_USERNAME = "your_username"
-ENGINE_PASSWORD = "your_password"
+ENGINE_TENANT = os.environ.get('ENGINE_TENANT', 'default')
+ENGINE_BASE_URL = os.environ.get('ENGINE_BASE_URL', 'http://localhost:8080/RusticiEngine/api/v2')
+ENGINE_USERNAME = os.environ.get('ENGINE_USERNAME', 'your_username')
+ENGINE_PASSWORD = os.environ.get('ENGINE_PASSWORD', 'your_password')
 
 async def get_auth_token():
     credentials = base64.b64encode(f"{ENGINE_USERNAME}:{ENGINE_PASSWORD}".encode()).decode()
@@ -26,7 +26,11 @@ async def get_token(request):
     return web.json_response({'token': session['auth_token']})
 
 async def handle(request):
-    response = aiohttp_jinja2.render_template("index.html", request, {})
+    context = {
+        'ENGINE_TENANT': ENGINE_TENANT,
+        'ENGINE_BASE_URL': ENGINE_BASE_URL
+    }
+    response = aiohttp_jinja2.render_template("index.html", request, context)
     return response
 
 async def upload_scorm(request):

@@ -42,6 +42,8 @@
     </table>
 
     <script>
+        const ENGINE_TENANT = '{{ ENGINE_TENANT }}';
+        const ENGINE_BASE_URL = '{{ ENGINE_BASE_URL }}';
         let authToken = '';
 
         async function getToken() {
@@ -51,19 +53,21 @@
         }
 
         async function getCourses() {
-            const response = await fetch('http://localhost:8080/RusticiEngine/api/v2/courses', {
+            const response = await fetch(`${ENGINE_BASE_URL}/courses`, {
                 headers: {
-                    'Authorization': authToken
+                    'Authorization': authToken,
+                    'X-Tenant': ENGINE_TENANT
                 }
             });
             return await response.json();
         }
 
         async function launchCourse(courseId) {
-            const response = await fetch(`http://localhost:8080/RusticiEngine/api/v2/courses/${courseId}/registrations`, {
+            const response = await fetch(`${ENGINE_BASE_URL}/courses/${courseId}/registrations`, {
                 method: 'POST',
                 headers: {
                     'Authorization': authToken,
+                    'X-Tenant': ENGINE_TENANT,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
@@ -75,10 +79,11 @@
         }
 
         async function uploadCourse(formData) {
-            const response = await fetch('http://localhost:8080/RusticiEngine/api/v2/courses/importJobs?mayCreateNewVersion=true', {
+            const response = await fetch(`${ENGINE_BASE_URL}/courses/importJobs?mayCreateNewVersion=true`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': authToken
+                    'Authorization': authToken,
+                    'X-Tenant': ENGINE_TENANT
                 },
                 body: formData
             });
