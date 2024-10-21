@@ -79,13 +79,14 @@
         }
 
         async function uploadCourse(formData) {
-            const response = await fetch(`${ENGINE_BASE_URL}/courses/importJobs?mayCreateNewVersion=true`, {
+            const response = await fetch(`${ENGINE_BASE_URL}/courses/importJobs`, {
                 method: 'POST',
                 headers: {
                     'Authorization': authToken,
-                    'engineTenantName': ENGINE_TENANT
+                    'engineTenantName': ENGINE_TENANT,
+                    'Content-Type': 'application/zip'
                 },
-                body: formData
+                body: formData.get('scorm_package')
             });
             return await response.json();
         }
