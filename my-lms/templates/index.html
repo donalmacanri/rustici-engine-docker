@@ -35,6 +35,7 @@
                 <th>Title</th>
                 <th>ID</th>
                 <th>Action</th>
+                <th>Registrations</th>
             </tr>
         </thead>
         <tbody>
@@ -113,6 +114,15 @@
                 launchButton.textContent = 'Launch';
                 launchButton.onclick = () => launchCourse(course.id);
                 launchCell.appendChild(launchButton);
+                const registrationsCell = row.insertCell(3);
+                const registrationsLink = document.createElement('a');
+                registrationsLink.textContent = 'View Registrations';
+                registrationsLink.href = `#`;
+                registrationsLink.onclick = (e) => {
+                    e.preventDefault();
+                    alert(`Viewing registrations for course ${course.id} is not implemented yet.`);
+                };
+                registrationsCell.appendChild(registrationsLink);
             });
         }
 
