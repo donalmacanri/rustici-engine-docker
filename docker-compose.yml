@@ -11,6 +11,11 @@ services:
       - "8080:8080"
     environment:
       - DATABASE_URL=postgres://rusticiengine:super-secret-password@postgres:5432/rusticiengine
+      - API_BASIC_ACCOUNTS=apiUser:apiPassword
+      - API_TOKEN_SECRET=23f9j30efjw9fj049jr3409gj3490gh
+      - FILE_PATH_TO_UPLOADED_ZIP=/tmp
+      - FILE_PATH_TO_CONTENT_ROOT=/usr/local/tomcat/webapps/rustici-engine/courses
+      - WEB_PATH_TO_CONTENT_ROOT=/rustici-engine/courses
     profiles:
       - run
     depends_on:
@@ -55,9 +60,9 @@ services:
       - "8081:8080"
     environment:
       - ENGINE_TENANT=default
-      - ENGINE_BASE_URL=http://rustici-engine:8080/RusticiEngine/api/v2
-      - ENGINE_USERNAME=your_username
-      - ENGINE_PASSWORD=your_password
+      - ENGINE_BASE_URL=http://rustici-engine:8080/rustici-engine/api/v2
+      - ENGINE_USERNAME=apiUser
+      - ENGINE_PASSWORD=apiPassword
     depends_on:
       - postgres
       - rustici-engine
