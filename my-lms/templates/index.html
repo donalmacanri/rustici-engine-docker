@@ -71,27 +71,19 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
+                  registration: {
                     courseId: courseId,
                     registrationId: `reg-${courseId}-${Date.now()}`,
                     learner: {
-                        id: 'testuser'
-                    },
-                    launchOptions: {
-                        startPage: "index_lms.html"
-                    },
-                    launchAuth: {
-                        ipAddress: "127.0.0.1",
-                        sessionId: "session-" + Date.now()
+                        id: 'testuser',
+                        firstName: 'test',
+                        lastName: 'user'
                     }
+                  },
                 })
             });
             const data = await response.json();
-            if (data.launchLink) {
-                window.open(data.launchLink, '_blank');
-            } else {
-                console.error('Failed to get launch link:', data);
-                alert('Failed to launch course. Please try again.');
-            }
+            window.open('http://localhost:8080' + data.launchLink, '_blank');
         }
 
         async function uploadCourse(formData) {
