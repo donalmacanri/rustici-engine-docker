@@ -4,6 +4,8 @@ from aiohttp import web
 import jinja2
 import aiohttp_jinja2
 import base64
+from datetime import datetime, timedelta
+import aiohttp
 
 # Rustici Engine API configuration
 ENGINE_TENANT = os.environ.get('ENGINE_TENANT', 'default')
@@ -15,8 +17,34 @@ async def get_auth_token():
     credentials = base64.b64encode(f"{ENGINE_USERNAME}:{ENGINE_PASSWORD}".encode()).decode()
     return f"Basic {credentials}"
 
+async def create_token():
+    url = f"{ENGINE_BASE_URL}/appManagement/token"
+    headers = {
+        "Authorization": await get_auth_token(),
+        "Content-Type": "application/json"
+    }
+    data = {
+        "permissions": {
+            "scopes": ["read", "write", "admin"],
+            "tenantName": ENGINE_TENANT
+        },
+        "expiry": (datetime.utcnow() + timedelta(hours=1)).isoformat() + "Z"
+    }
+    
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, headers=headers, json=data) as response:
+            if response.status == 200:
+                result = await response.json()
+                return result['result']
+            else:
+                raise Exception(f"Failed to create token: {response.status}")
+
 async def get_token(request):
-    return web.json_response({'token': await get_auth_token()})
+    try:
+        token = await create_token()
+        return web.json_response({'token': token})
+    except Exception as e:
+        return web.json_response({'error': str(e)}, status=500)
 
 async def handle(request):
     context = {
