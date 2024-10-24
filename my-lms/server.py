@@ -1,7 +1,9 @@
 import asyncio
 import os
 from aiohttp import web
+from aiohttp.web import RouteTableDef
 import jinja2
+routes = RouteTableDef()
 import aiohttp_jinja2
 import base64
 from datetime import datetime, timedelta
@@ -44,7 +46,8 @@ async def create_token():
                 raise Exception(f"Failed to create token: {response.status}")
 
 
-async def get_token(request):
+@routes.get('/token')
+async def token(request):
     try:
         token = await create_token()
         return web.json_response({"token": f"Bearer {token}"})
@@ -105,13 +108,15 @@ async def setup_subscription():
             await create_registration_subscription(session, headers)
 
 
-async def handle_webhook(request):
+@routes.post('/webhook')
+async def webhook(request):
     payload = await request.json()
     print("Webhook payload received:", payload)
     return web.Response(status=200)
 
 
-async def handle(request):
+@routes.get('/')
+async def index(request):
     context = {"ENGINE_TENANT": ENGINE_TENANT, "ENGINE_BASE_URL": ENGINE_BASE_URL}
     response = aiohttp_jinja2.render_template("index.html", request, context)
     return response
@@ -120,13 +125,7 @@ async def handle(request):
 async def main():
     app = web.Application()
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader("./templates"))
-    app.add_routes(
-        [
-            web.get("/", handle),
-            web.get("/token", get_token),
-            web.post("/webhook", handle_webhook),
-        ]
-    )
+    app.router.add_routes(routes)
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, "0.0.0.0", 8081)
