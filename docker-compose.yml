@@ -10,7 +10,7 @@ services:
     ports:
       - "8080:8080"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/rustici-engine/api/v2/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/rustici-engine/api/v2/ping"]
       interval: 10s
       timeout: 5s
       retries: 3
