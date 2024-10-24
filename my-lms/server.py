@@ -3,7 +3,6 @@ import os
 from aiohttp import web
 from aiohttp.web import RouteTableDef
 import jinja2
-routes = RouteTableDef()
 import aiohttp_jinja2
 import base64
 from datetime import datetime, timedelta
@@ -44,15 +43,6 @@ async def create_token():
             else:
                 print(response)
                 raise Exception(f"Failed to create token: {response.status}")
-
-
-@routes.get('/token')
-async def token(request):
-    try:
-        token = await create_token()
-        return web.json_response({"token": f"Bearer {token}"})
-    except Exception as e:
-        return web.json_response({"error": str(e)}, status=500)
 
 
 async def get_subscriptions(session, headers):
@@ -108,18 +98,30 @@ async def setup_subscription():
             await create_registration_subscription(session, headers)
 
 
-@routes.post('/webhook')
-async def webhook(request):
-    payload = await request.json()
-    print("Webhook payload received:", payload)
-    return web.Response(status=200)
+routes = RouteTableDef()
 
 
-@routes.get('/')
+@routes.get("/")
 async def index(request):
     context = {"ENGINE_TENANT": ENGINE_TENANT, "ENGINE_BASE_URL": ENGINE_BASE_URL}
     response = aiohttp_jinja2.render_template("index.html", request, context)
     return response
+
+
+@routes.get("/token")
+async def token(request):
+    try:
+        token = await create_token()
+        return web.json_response({"token": f"Bearer {token}"})
+    except Exception as e:
+        return web.json_response({"error": str(e)}, status=500)
+
+
+@routes.post("/webhook")
+async def webhook(request):
+    payload = await request.json()
+    print("Webhook payload received:", payload)
+    return web.Response(status=200)
 
 
 async def main():
