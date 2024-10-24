@@ -131,16 +131,15 @@ async def main():
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, "0.0.0.0", 8081)
-    await site.start()
-    
-    print(f"Serving on http://localhost:8081")
-
-    # Setup subscription after server starts
+    # Setup subscription before starting the main server loop
     try:
         await setup_subscription()
         print("Subscription setup complete")
     except Exception as e:
         print(f"Failed to setup subscription: {e}")
+
+    await site.start()
+    print(f"Serving on http://localhost:8081")
 
     try:
         # Keep the server running until interrupted
