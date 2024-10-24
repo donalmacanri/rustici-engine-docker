@@ -6,6 +6,7 @@ import aiohttp_jinja2
 import base64
 from datetime import datetime, timedelta
 import aiohttp
+import urllib.parse
 
 # Rustici Engine API configuration
 ENGINE_TENANT = os.environ.get('ENGINE_TENANT', 'default')
@@ -48,6 +49,54 @@ async def get_token(request):
     except Exception as e:
         return web.json_response({'error': str(e)}, status=500)
 
+async def get_subscriptions(session, headers):
+    url = f"{ENGINE_BASE_URL}/appManagement/subscriptions"
+    async with session.get(url, headers=headers) as response:
+        if response.status == 200:
+            return await response.json()
+        else:
+            raise Exception(f"Failed to get subscriptions: {response.status}")
+
+async def create_registration_subscription(session, headers):
+    # Get the server's public URL - in production this should be configurable
+    server_url = "http://localhost:8080"
+    webhook_url = f"{server_url}/webhook"
+    
+    subscription_data = {
+        "topic": "RegistrationChanged",
+        "url": webhook_url,
+        "enabled": True,
+        "asyncMode": "Thread",
+        "strictOrdering": False
+    }
+    
+    url = f"{ENGINE_BASE_URL}/appManagement/subscriptions"
+    async with session.post(url, headers=headers, json=subscription_data) as response:
+        if response.status == 200:
+            result = await response.json()
+            print(f"Created subscription: {result['result']}")
+        else:
+            raise Exception(f"Failed to create subscription: {response.status}")
+
+async def setup_subscription():
+    headers = {
+        "Authorization": await get_system_token(),
+        "Content-Type": "application/json"
+    }
+    
+    async with aiohttp.ClientSession() as session:
+        # Check existing subscriptions
+        subscriptions = await get_subscriptions(session, headers)
+        
+        # Check if we already have a RegistrationChanged subscription
+        has_subscription = any(
+            sub["definition"]["topic"] == "RegistrationChanged" 
+            for sub in subscriptions.get("subscriptions", [])
+        )
+        
+        if not has_subscription:
+            await create_registration_subscription(session, headers)
+
 async def handle_webhook(request):
     payload = await request.json()
     print("Webhook payload received:", payload)
@@ -74,6 +123,14 @@ async def main():
     site = web.TCPSite(runner, "0.0.0.0", 8080)
     await site.start()
     print(f"Serving on http://localhost:8080")
+    
+    # Setup subscription after server starts
+    try:
+        await setup_subscription()
+        print("Subscription setup complete")
+    except Exception as e:
+        print(f"Failed to setup subscription: {e}")
+    
     await asyncio.Event().wait()  # run forever
 
 
