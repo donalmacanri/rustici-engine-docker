@@ -132,6 +132,7 @@ async def main():
     await runner.setup()
     site = web.TCPSite(runner, "0.0.0.0", 8081)
     await site.start()
+    
     print(f"Serving on http://localhost:8081")
 
     # Setup subscription after server starts
@@ -141,8 +142,17 @@ async def main():
     except Exception as e:
         print(f"Failed to setup subscription: {e}")
 
-    await asyncio.Event().wait()  # run forever
+    try:
+        # Keep the server running until interrupted
+        while True:
+            await asyncio.sleep(3600)  # Sleep for an hour at a time
+    except asyncio.CancelledError:
+        # Handle shutdown gracefully
+        await runner.cleanup()
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\nShutting down gracefully...")
