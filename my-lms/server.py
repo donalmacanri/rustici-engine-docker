@@ -48,6 +48,11 @@ async def get_token(request):
     except Exception as e:
         return web.json_response({'error': str(e)}, status=500)
 
+async def handle_webhook(request):
+    payload = await request.json()
+    print("Webhook payload received:", payload)
+    return web.Response(status=200)
+
 async def handle(request):
     context = {
         'ENGINE_TENANT': ENGINE_TENANT,
@@ -61,7 +66,8 @@ async def main():
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader("./templates"))
     app.add_routes([
         web.get("/", handle),
-        web.get("/token", get_token)
+        web.get("/token", get_token),
+        web.post("/webhook", handle_webhook)
     ])
     runner = web.AppRunner(app)
     await runner.setup()
