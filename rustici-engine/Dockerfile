@@ -6,7 +6,6 @@ RUN mkdir -p build \
     && cp engine-release/RusticiEngine.war build/rustici-engine.war \
     && cd engine-customizations \
     && jar -uf ../build/rustici-engine.war .
-RUN ls /builder/build
 
 # Installer stage
 FROM eclipse-temurin:11-jdk as installer
@@ -17,7 +16,6 @@ WORKDIR /usr/local/rustici-engine/Installer
 ENTRYPOINT ["/usr/local/rustici-engine/Installer/install.sh"]
 
 # Final stage without installer
-FROM tomcat:9.0.65-jdk11-temurin as main 
+FROM tomcat:9.0.65-jdk11-temurin as main
 COPY --from=builder /builder/build/rustici-engine.war /usr/local/tomcat/webapps/rustici-engine.war
 COPY ./bin/setenv.sh $CATALINA_HOME/bin
-
