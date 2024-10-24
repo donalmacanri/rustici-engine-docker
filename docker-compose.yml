@@ -68,6 +68,7 @@ services:
       - ENGINE_BASE_URL=http://rustici-engine:8080/rustici-engine/api/v2
       - ENGINE_USERNAME=apiUser
       - ENGINE_PASSWORD=apiPassword
+      - MYLMS_SERVER_URL=http://my-lms:8081
     depends_on:
       - postgres
       - rustici-engine

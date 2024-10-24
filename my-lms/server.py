@@ -62,8 +62,10 @@ async def get_subscriptions(session, headers):
 
 
 async def create_registration_subscription(session, headers):
-    # Get the server's public URL - in production this should be configurable
-    server_url = "http://my-lms:8080"
+    # Get the server's public URL from environment variable
+    server_url = os.environ.get("MYLMS_SERVER_URL")
+    if not server_url:
+        raise Exception("MYLMS_SERVER_URL environment variable not set")
     webhook_url = f"{server_url}/webhook"
 
     subscription_data = {
@@ -127,9 +129,9 @@ async def main():
     )
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, "0.0.0.0", 8080)
+    site = web.TCPSite(runner, "0.0.0.0", 8081)
     await site.start()
-    print(f"Serving on http://localhost:8080")
+    print(f"Serving on http://localhost:8081")
 
     # Setup subscription after server starts
     try:
