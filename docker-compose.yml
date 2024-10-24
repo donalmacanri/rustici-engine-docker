@@ -17,7 +17,10 @@ services:
       - FILE_PATH_TO_CONTENT_ROOT=/usr/local/tomcat/webapps/rustici-engine/courses
       - WEB_PATH_TO_CONTENT_ROOT=/rustici-engine/courses
     volumes:
-      - rustici_engine_courses:/usr/local/tomcat/webapps/rustici-engine/courses
+      # this volume exists only so that uploaded courses persist between reloads;
+      # in a production-ready configuration, course content should be delivered
+      # by a dedicated CDN, or web server
+      - webapps_root:/usr/local/tomcat/webapps/
     profiles:
       - run
     depends_on:
@@ -71,7 +74,7 @@ services:
 
 volumes:
   postgres_data:
-  rustici_engine_courses:
+  webapps_root:
 
 configs:
   init_dbs.sql:
