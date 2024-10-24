@@ -1,5 +1,6 @@
 import asyncio
 import base64
+import sys
 from datetime import datetime, timedelta
 import os
 
@@ -41,7 +42,7 @@ async def create_token():
                 result = await response.json()
                 return result["result"]
             else:
-                print(response)
+                print(response, flush=True)
                 raise Exception(f"Failed to create token: {response.status}")
 
 
@@ -72,7 +73,7 @@ async def create_registration_subscription(session, headers):
     async with session.post(url, headers=headers, json=subscription_data) as response:
         if response.status == 200:
             result = await response.json()
-            print(f"Created subscription: {result['result']}")
+            print(f"Created subscription: {result['result']}", flush=True)
         else:
             raise Exception(f"Failed to create subscription: {response.status}")
 
@@ -120,7 +121,7 @@ async def token(request):
 @routes.post("/webhook")
 async def webhook(request):
     payload = await request.json()
-    print("Webhook payload received:", payload)
+    print("Webhook payload received:", payload, flush=True)
     return web.Response(status=200)
 
 
@@ -134,12 +135,12 @@ async def main():
     # Setup subscription before starting the main server loop
     try:
         await setup_subscription()
-        print("Subscription setup complete")
+        print("Subscription setup complete", flush=True)
     except Exception as e:
-        print(f"Failed to setup subscription: {e}")
+        print(f"Failed to setup subscription: {e}", flush=True)
 
     await site.start()
-    print(f"Serving on http://localhost:8081")
+    print(f"Serving on http://localhost:8081", flush=True)
 
     try:
         # Keep the server running until interrupted
@@ -154,4 +155,4 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print("\nShutting down gracefully...")
+        print("\nShutting down gracefully...", flush=True)
