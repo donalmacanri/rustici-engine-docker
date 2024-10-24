@@ -35,7 +35,6 @@
                 <th>Title</th>
                 <th>ID</th>
                 <th>Action</th>
-                <th>Registrations</th>
             </tr>
         </thead>
         <tbody>
@@ -81,6 +80,9 @@
                         lastName: 'user'
                     }
                   },
+                  launchLink: {
+                    redirectOnExitUrl: location.origin,
+                  }
                 })
             });
             const data = await response.json();
@@ -114,11 +116,6 @@
                 launchButton.textContent = 'Launch';
                 launchButton.onclick = () => launchCourse(course.id);
                 launchCell.appendChild(launchButton);
-                const registrationsCell = row.insertCell(3);
-                const registrationsLink = document.createElement('a');
-                registrationsLink.textContent = 'View Registrations';
-                registrationsLink.href = `http://localhost:8080/rustici-engine/defaultui/admin`;
-                registrationsCell.appendChild(registrationsLink);
             });
         }
 

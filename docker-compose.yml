@@ -21,11 +21,11 @@ services:
       - FILE_PATH_TO_UPLOADED_ZIP=/tmp
       - FILE_PATH_TO_CONTENT_ROOT=/usr/local/tomcat/webapps/rustici-engine/courses
       - WEB_PATH_TO_CONTENT_ROOT=/rustici-engine/courses
-    volumes:
-      # this volume exists only so that uploaded courses persist between reloads;
-      # in a production-ready configuration, course content should be delivered
-      # by a dedicated CDN, or web server
-      - webapps_root:/usr/local/tomcat/webapps/
+    # volumes:
+    #   # this volume exists only so that uploaded courses persist between reloads;
+    #   # in a production-ready configuration, course content should be delivered
+    #   # by a dedicated CDN, or web server
+    #   - webapps_root:/usr/local/tomcat/webapps/
     profiles:
       - run
     depends_on:
@@ -74,6 +74,8 @@ services:
       - ENGINE_USERNAME=apiUser
       - ENGINE_PASSWORD=apiPassword
       - MYLMS_SERVER_URL=http://my-lms:8081
+    profiles:
+      - run
     depends_on:
       rustici-engine:
         condition: service_healthy

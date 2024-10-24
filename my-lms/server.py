@@ -142,17 +142,8 @@ async def main():
     await site.start()
     print(f"Serving on http://localhost:8081", flush=True)
 
-    try:
-        # Keep the server running until interrupted
-        while True:
-            await asyncio.sleep(3600)  # Sleep for an hour at a time
-    except asyncio.CancelledError:
-        # Handle shutdown gracefully
-        await runner.cleanup()
+    await asyncio.Event().wait()
 
 
 if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        print("\nShutting down gracefully...", flush=True)
+    asyncio.run(main())
