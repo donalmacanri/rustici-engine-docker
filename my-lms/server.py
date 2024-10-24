@@ -1,13 +1,13 @@
 import asyncio
+import base64
+from datetime import datetime, timedelta
 import os
+
+import aiohttp
+import aiohttp_jinja2
 from aiohttp import web
 from aiohttp.web import RouteTableDef
 import jinja2
-import aiohttp_jinja2
-import base64
-from datetime import datetime, timedelta
-import aiohttp
-import urllib.parse
 
 # Rustici Engine API configuration
 ENGINE_TENANT = os.environ.get("ENGINE_TENANT")
