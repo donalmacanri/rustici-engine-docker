@@ -9,6 +9,11 @@ services:
     image: donalmacanri/rustici-engine
     ports:
       - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/rustici-engine/api/v2/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     environment:
       - DATABASE_URL=postgres://rusticiengine:super-secret-password@postgres:5432/rusticiengine
       - API_BASIC_ACCOUNTS=apiUser:apiPassword
@@ -70,8 +75,8 @@ services:
       - ENGINE_PASSWORD=apiPassword
       - MYLMS_SERVER_URL=http://my-lms:8081
     depends_on:
-      - postgres
-      - rustici-engine
+      rustici-engine:
+        condition: service_healthy
 
 volumes:
   postgres_data:
