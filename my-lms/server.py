@@ -13,36 +13,38 @@ ENGINE_BASE_URL = os.environ.get('ENGINE_BASE_URL', 'http://localhost:8080/Rusti
 ENGINE_USERNAME = os.environ.get('ENGINE_USERNAME', 'your_username')
 ENGINE_PASSWORD = os.environ.get('ENGINE_PASSWORD', 'your_password')
 
-async def get_auth_token():
+async def get_system_token():
     credentials = base64.b64encode(f"{ENGINE_USERNAME}:{ENGINE_PASSWORD}".encode()).decode()
     return f"Basic {credentials}"
 
 async def create_token():
     url = f"{ENGINE_BASE_URL}/appManagement/token"
     headers = {
-        "Authorization": await get_auth_token(),
+        "Authorization": await get_system_token(),
         "Content-Type": "application/json"
     }
     data = {
+        "id":f"token_{int(datetime.utcnow().timestamp())}",
         "permissions": {
-            "scopes": ["read", "write", "admin"],
+            "scopes": ["read", "write"],
             "tenantName": ENGINE_TENANT
         },
         "expiry": (datetime.utcnow() + timedelta(hours=1)).isoformat() + "Z"
     }
-    
+
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers=headers, json=data) as response:
             if response.status == 200:
                 result = await response.json()
                 return result['result']
             else:
+                print(response)
                 raise Exception(f"Failed to create token: {response.status}")
 
 async def get_token(request):
     try:
         token = await create_token()
-        return web.json_response({'token': token})
+        return web.json_response({'token': f"Bearer {token}"})
     except Exception as e:
         return web.json_response({'error': str(e)}, status=500)
 
